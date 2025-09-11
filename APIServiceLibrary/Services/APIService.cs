@@ -27,7 +27,8 @@ namespace APIServiceLibrary.Services
                 if (response.IsSuccessStatusCode)
                 {
                     var responseBody = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                    driver = JsonConvert.DeserializeObject<ResultsDTO>(responseBody);
+                    driver = JsonConvert.DeserializeObject<ResultsDTO>(responseBody) ?? new ResultsDTO();
+
                 }
             }
 
