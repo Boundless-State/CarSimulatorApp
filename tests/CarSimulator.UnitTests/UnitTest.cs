@@ -1,6 +1,6 @@
 ﻿namespace CarSimulator.UnitTests;
 
-public class UnitTest1
+public class UnitTest
 {
     [Fact]
     public void Test1()
