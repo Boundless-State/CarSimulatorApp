@@ -29,7 +29,7 @@ namespace UnitTests
              Assert.DoesNotContain("refuel", msg, StringComparison.OrdinalIgnoreCase);
          }
 
-         // 6 TESTER: gas är 0 och ej refuel (6) -> SKA visa refuel
+         // TEST: gas är 0 och ej refuel (6) -> SKA visa refuel
          [Theory]
          [InlineData(1)] // left
          [InlineData(2)] // right
@@ -66,6 +66,6 @@ namespace UnitTests
              Assert.Contains("refuel", msg, StringComparison.OrdinalIgnoreCase);
          }
      }
- }
+}
 
 
