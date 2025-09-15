@@ -1,0 +1,62 @@
+trigger:
+  branches:
+    include: [dev, master]
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  buildConfiguration: 'Release'
+  solution: 'CarSimulatorApp.sln'
+  webProject: 'CarSimulator.Server/CarSimulator.Server.csproj'
+  artifactName: 'drop'
+
+stages:
+- stage: Build
+  displayName: 'Build'
+  jobs:
+  - job: Build
+    displayName: 'Build solution'
+    steps:
+    - checkout: self
+      displayName: 'Checkout'
+    - task: UseDotNet@2
+      displayName: 'Install .NET SDK 9'
+      inputs:
+        packageType: 'sdk'
+        version: '9.0.x'
+    - script: dotnet restore $(solution)
+      displayName: 'Restore'
+    - script: dotnet build $(solution) -c $(buildConfiguration) -warnaserror
+      displayName: 'Build (warnings as errors)'
+    - script: dotnet publish $(webProject) -c $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)/web
+      displayName: 'Publish web'
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish artifact'
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: '$(artifactName)'
+
+- stage: Test
+  displayName: 'Test'
+  dependsOn: Build
+  jobs:
+  - job: Tests
+    displayName: 'Run unit & integration tests'
+    steps:
+    - task: UseDotNet@2
+      displayName: 'Install .NET SDK 9'
+      inputs:
+        packageType: 'sdk'
+        version: '9.0.x'
+    - script: |
+        dotnet test tests/CarSimulator.UnitTests/CarSimulator.UnitTests.csproj -c $(buildConfiguration) --logger trx
+        dotnet test tests/CarSimulator.IntegrationTests/CarSimulator.IntegrationTests.csproj -c $(buildConfiguration) --logger trx
+      displayName: 'dotnet test (break on fail)'
+    - task: PublishTestResults@2
+      displayName: 'Publish test results'
+      inputs:
+        testResultsFormat: 'VSTest'
+        testResultsFiles: '**/*.trx'
+        searchFolder: '$(System.DefaultWorkingDirectory)'
+        failTaskOnFailedTests: true
