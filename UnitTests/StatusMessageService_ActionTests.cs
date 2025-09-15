@@ -50,7 +50,7 @@ namespace UnitTests
              Assert.Contains("refuel", msg, StringComparison.OrdinalIgnoreCase);
          }
 
-         // 1 TEST: refuel (6) -> ska visa att bilen tankar
+         // TEST: refuel (6) -> ska visa att bilen tankar
          [Fact]
          public void Test_Refuel_Action_Should_Show_Refuels()
          {

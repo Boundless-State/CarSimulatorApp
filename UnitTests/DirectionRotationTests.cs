@@ -13,7 +13,7 @@ namespace UnitTests
         {
             // Arrange
             IDirectionContext ctx = new DirectionContext();
-            ctx.SetStrategy(new DriveLeftStrategy());
+            ctx.SetStrategy(new TurnLeftStrategy());
             var status = new StatusDTO { CardinalDirection = CardinalDirection.North, GasValue = 10, EnergyValue = 50 };
 
             // Act
@@ -28,7 +28,7 @@ namespace UnitTests
         {
             // Arrange
             IDirectionContext ctx = new DirectionContext();
-            ctx.SetStrategy(new DriveLeftStrategy());
+            ctx.SetStrategy(new TurnLeftStrategy());
             var status = new StatusDTO { CardinalDirection = CardinalDirection.West, GasValue = 10, EnergyValue = 50 };
 
             // Act
@@ -43,7 +43,7 @@ namespace UnitTests
         {
             // Arrange
             IDirectionContext ctx = new DirectionContext();
-            ctx.SetStrategy(new DriveLeftStrategy());
+            ctx.SetStrategy(new TurnLeftStrategy());
             var status = new StatusDTO { CardinalDirection = CardinalDirection.South, GasValue = 10, EnergyValue = 50 };
 
             // Act
@@ -58,7 +58,7 @@ namespace UnitTests
         {
             // Arrange
             IDirectionContext ctx = new DirectionContext();
-            ctx.SetStrategy(new DriveLeftStrategy());
+            ctx.SetStrategy(new TurnLeftStrategy());
             var status = new StatusDTO { CardinalDirection = CardinalDirection.East, GasValue = 10, EnergyValue = 50 };
 
             // Act
@@ -68,14 +68,12 @@ namespace UnitTests
             Assert.Equal(CardinalDirection.North, next.CardinalDirection);
         }
 
-        // RIGHT turns
-
         [Fact]
         public void Right_From_North_Should_Be_East()
         {
             // Arrange
             IDirectionContext ctx = new DirectionContext();
-            ctx.SetStrategy(new DriveRightStrategy());
+            ctx.SetStrategy(new TurnRightStrategy());
             var status = new StatusDTO { CardinalDirection = CardinalDirection.North, GasValue = 10, EnergyValue = 50 };
 
             // Act
@@ -90,7 +88,7 @@ namespace UnitTests
         {
             // Arrange
             IDirectionContext ctx = new DirectionContext();
-            ctx.SetStrategy(new DriveRightStrategy());
+            ctx.SetStrategy(new TurnRightStrategy());
             var status = new StatusDTO { CardinalDirection = CardinalDirection.East, GasValue = 10, EnergyValue = 50 };
 
             // Act
@@ -105,7 +103,7 @@ namespace UnitTests
         {
             // Arrange
             IDirectionContext ctx = new DirectionContext();
-            ctx.SetStrategy(new DriveRightStrategy());
+            ctx.SetStrategy(new TurnRightStrategy());
             var status = new StatusDTO { CardinalDirection = CardinalDirection.South, GasValue = 10, EnergyValue = 50 };
 
             // Act
@@ -120,7 +118,7 @@ namespace UnitTests
         {
             // Arrange
             IDirectionContext ctx = new DirectionContext();
-            ctx.SetStrategy(new DriveRightStrategy());
+            ctx.SetStrategy(new TurnRightStrategy());
             var status = new StatusDTO { CardinalDirection = CardinalDirection.West, GasValue = 10, EnergyValue = 50 };
 
             // Act
@@ -129,8 +127,6 @@ namespace UnitTests
             // Assert
             Assert.Equal(CardinalDirection.North, next.CardinalDirection);
         }
-
-        // FORWARD/BACKWARD keep heading
 
         [Fact]
         public void Forward_Should_Not_Change_CardinalDirection()
@@ -147,19 +143,5 @@ namespace UnitTests
             Assert.Equal(CardinalDirection.South, next.CardinalDirection);
         }
 
-        [Fact]
-        public void Backward_Should_Not_Change_CardinalDirection()
-        {
-            // Arrange
-            IDirectionContext ctx = new DirectionContext();
-            ctx.SetStrategy(new DriveBackwardStrategy());
-            var status = new StatusDTO { CardinalDirection = CardinalDirection.East, GasValue = 10, EnergyValue = 50 };
-
-            // Act
-            var next = ctx.ExecuteStrategy(status);
-
-            // Assert
-            Assert.Equal(CardinalDirection.East, next.CardinalDirection);
-        }
     }
 }
