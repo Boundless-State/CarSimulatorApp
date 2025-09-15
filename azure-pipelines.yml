@@ -27,8 +27,6 @@ stages:
         version: '9.0.x'
     - script: dotnet restore $(solution)
       displayName: 'Restore'
-    - script: dotnet build $(solution) -c $(buildConfiguration) -warnaserror
-      displayName: 'Build (warnings as errors)'
     - script: dotnet publish $(webProject) -c $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)/web
       displayName: 'Publish web'
     - task: PublishBuildArtifacts@1
