@@ -1,6 +1,14 @@
 trigger:
   branches:
-    include: [dev, master]
+    include:
+      - master
+      - dev
+
+pr:
+  branches:
+    include:
+      - master
+      - dev
 
 pool:
   vmImage: 'windows-latest'
@@ -27,6 +35,8 @@ stages:
         version: '9.0.x'
     - script: dotnet restore $(solution)
       displayName: 'Restore'
+    - script: dotnet build $(solution) -c $(buildConfiguration)
+      displayName: 'Build'
     - script: dotnet publish $(webProject) -c $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)/web
       displayName: 'Publish web'
     - task: PublishBuildArtifacts@1
@@ -40,17 +50,15 @@ stages:
   dependsOn: Build
   jobs:
   - job: Tests
-    displayName: 'Run unit & integration tests'
+    displayName: 'Run all tests in solution'
     steps:
     - task: UseDotNet@2
       displayName: 'Install .NET SDK 9'
       inputs:
         packageType: 'sdk'
         version: '9.0.x'
-    - script: |
-        dotnet test tests/CarSimulator.UnitTests/CarSimulator.UnitTests.csproj -c $(buildConfiguration) --logger trx
-        dotnet test tests/CarSimulator.IntegrationTests/CarSimulator.IntegrationTests.csproj -c $(buildConfiguration) --logger trx
-      displayName: 'dotnet test (break on fail)'
+    - script: dotnet test $(solution) -c $(buildConfiguration) --logger trx
+      displayName: 'dotnet test (solution)'
     - task: PublishTestResults@2
       displayName: 'Publish test results'
       inputs:
