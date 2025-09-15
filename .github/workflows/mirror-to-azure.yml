@@ -1,0 +1,25 @@
+name: Mirror to Azure DevOps
+
+on:
+  push:
+    branches: ['**']
+    tags: ['**']
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Add Azure DevOps remote
+        run: |
+          git remote add azure "https://DevOpsParallelismPROG24@dev.azure.com/DevOpsParallelismPROG24/DevOpsProg24/_git/DevOpsProg24"
+
+      - name: Push all branches and tags to Azure DevOps
+        run: |
+          AUTH=$(printf ":%s" "${{ secrets.READWRITEAZURE }}" | base64 -w0)
+          git -c http.extraheader="AUTHORIZATION: Basic $AUTH" push azure --all
+          git -c http.extraheader="AUTHORIZATION: Basic $AUTH" push azure --tags
