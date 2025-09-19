@@ -93,8 +93,9 @@ stages:
         deploy:
           steps:
           - download: current
-            artifact: '$(artifactName)'
+            artifact: '$(artifactName)'       # 'drop'
             displayName: 'Download artifact'
+
           - task: AzureWebApp@1
             displayName: 'Deploy to carsimdev-tw'
             inputs:
