@@ -1,14 +1,10 @@
 trigger:
   branches:
-    include:
-      - master
-      - dev
+    include: [ master, dev ]
 
 pr:
   branches:
-    include:
-      - master
-      - dev
+    include: [ master, dev ]
 
 pool:
   vmImage: 'windows-latest'
@@ -22,14 +18,8 @@ variables:
   publishDir: '$(Build.ArtifactStagingDirectory)/web'
   packageZip: '$(Build.ArtifactStagingDirectory)/web.zip'
   serviceConnection: 'SC-carsimdev-tw'
-  devWebAppName: 'carsimdev-tw'
-  prodWebAppName: 'carsimdev-tw'
-
-  
-  serviceConnection: 'SC-carsimdev-tw'
-  devWebAppName: 'carsimdev-tw'
-  
-  prodWebAppName: 'carsimdev-tw'
+  devWebAppName: 'CarSimDevOps25'
+  prodWebAppName: 'CarSimDevOps25'
 
 stages:
 # =============== BUILD =================
@@ -37,15 +27,10 @@ stages:
   displayName: 'Build'
   jobs:
   - job: Build
-    displayName: 'Build solution'
     steps:
     - checkout: self
-      displayName: 'Checkout'
     - task: UseDotNet@2
-      displayName: 'Install .NET SDK 9'
-      inputs:
-        packageType: 'sdk'
-        version: '9.0.x'
+      inputs: { packageType: 'sdk', version: '9.0.x' }
     - script: dotnet restore $(solution)
       displayName: 'Restore'
     - script: dotnet build $(solution) -c $(buildConfiguration)
@@ -57,7 +42,7 @@ stages:
       inputs:
         rootFolderOrFile: '$(publishDir)'
         includeRootFolder: false
-        archiveType: 'zip'
+        archiveType: zip
         archiveFile: '$(packageZip)'
         replaceExistingArchive: true
     - task: PublishBuildArtifacts@1
@@ -72,19 +57,14 @@ stages:
   dependsOn: Build
   jobs:
   - job: Tests
-    displayName: 'Run tests'
     steps:
     - task: UseDotNet@2
-      displayName: 'Install .NET SDK 9'
-      inputs:
-        packageType: 'sdk'
-        version: '9.0.x'
+      inputs: { packageType: 'sdk', version: '9.0.x' }
     - script: dotnet test $(solution) -c $(buildConfiguration) --logger trx
       displayName: 'dotnet test (solution)'
     - task: PublishTestResults@2
-      displayName: 'Publish test results'
       inputs:
-        testResultsFormat: 'VSTest'
+        testResultsFormat: VSTest
         testResultsFiles: '**/*.trx'
         searchFolder: '$(System.DefaultWorkingDirectory)'
         failTaskOnFailedTests: true
@@ -94,7 +74,7 @@ stages:
   displayName: 'Deploy'
   dependsOn: Test
   jobs:
-  # ----- DEV -----
+  # DEV
   - deployment: Deploy_Dev
     displayName: 'Deploy to Azure App Service (dev)'
     environment: 'dev'
@@ -105,8 +85,7 @@ stages:
           steps:
           - download: current
             artifact: '$(artifactName)'
-
-            displayName: 'Download artifact'
+            displayName: 'Download artifact (current run)'
           - task: AzureWebApp@1
             displayName: 'Deploy to $(devWebAppName)'
             inputs:
@@ -114,7 +93,7 @@ stages:
               appName: '$(devWebAppName)'
               package: '$(Pipeline.Workspace)/$(artifactName)/web.zip'
 
-  # ----- MASTER -----
+  # MASTER
   - deployment: Deploy_Master
     displayName: 'Deploy to Azure App Service (master)'
     environment: 'prod'
@@ -125,7 +104,7 @@ stages:
           steps:
           - download: current
             artifact: '$(artifactName)'
-            displayName: 'Download artifact'
+            displayName: 'Download artifact (current run)'
           - task: AzureWebApp@1
             displayName: 'Deploy to $(prodWebAppName)'
             inputs:
