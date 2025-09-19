@@ -84,7 +84,6 @@ stages:
   displayName: 'Deploy'
   dependsOn: Test
   jobs:
-  # --- Deploy till DEV när branchen är 'dev'
   - deployment: Deploy_Dev
     displayName: 'Deploy to Azure App Service (dev)'
     environment: 'dev'
@@ -94,8 +93,9 @@ stages:
         deploy:
           steps:
           - download: current
-            artifact: '$(artifactName)'
+            artifact: '$(artifactName)'       # 'drop'
             displayName: 'Download artifact'
+
           - task: AzureWebApp@1
             displayName: 'Deploy to carsimdev-tw'
             inputs:
