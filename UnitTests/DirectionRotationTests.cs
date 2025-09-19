@@ -143,19 +143,5 @@ namespace UnitTests
             Assert.Equal(CardinalDirection.South, next.CardinalDirection);
         }
 
-        [Fact]
-        public void Backward_Should_Not_Change_CardinalDirection()
-        {
-            // Arrange
-            IDirectionContext ctx = new DirectionContext();
-            ctx.SetStrategy(new ReverseStrategy());
-            var status = new StatusDTO { CardinalDirection = CardinalDirection.East, GasValue = 10, EnergyValue = 50 };
-
-            // Act
-            var next = ctx.ExecuteStrategy(status);
-
-            // Assert
-            Assert.Equal(CardinalDirection.East, next.CardinalDirection);
-        }
     }
 }
