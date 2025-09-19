@@ -17,12 +17,16 @@ variables:
   buildConfiguration: 'Release'
   solution: 'CarSimulatorApp.sln'
   webProject: 'CarSimulator.Server/CarSimulator.Server.csproj'
+
   artifactName: 'drop'
   publishDir: '$(Build.ArtifactStagingDirectory)/web'
   packageZip: '$(Build.ArtifactStagingDirectory)/web.zip'
+  serviceConnection: 'SC-carsimdev-tw'
+  devWebAppName: 'carsimdev-tw'
+  prodWebAppName: 'carsimdev-tw'
 
 stages:
-# ===================== BUILD =====================
+# =============== BUILD =================
 - stage: Build
   displayName: 'Build'
   jobs:
@@ -56,7 +60,7 @@ stages:
         PathtoPublish: '$(Build.ArtifactStagingDirectory)'
         ArtifactName: '$(artifactName)'
 
-# ====================== TEST =====================
+# ================ TEST =================
 - stage: Test
   displayName: 'Test'
   dependsOn: Build
@@ -78,8 +82,8 @@ stages:
         testResultsFiles: '**/*.trx'
         searchFolder: '$(System.DefaultWorkingDirectory)'
         failTaskOnFailedTests: true
-
-# ===================== DEPLOY ====================
+        
+# =============== DEPLOY ===============
 - stage: Deploy
   displayName: 'Deploy'
   dependsOn: Test
@@ -93,12 +97,28 @@ stages:
         deploy:
           steps:
           - download: current
-            artifact: '$(artifactName)'       # 'drop'
+            artifact: '$(artifactName)'
             displayName: 'Download artifact'
-
           - task: AzureWebApp@1
-            displayName: 'Deploy to carsimdev-tw'
+            displayName: 'Deploy to $(devWebAppName)'
             inputs:
-              azureSubscription: 'SC-carsimdev-tw'
-              appName: 'carsimdev-tw'
+              azureSubscription: '$(serviceConnection)'
+              appName: '$(devWebAppName)'
+              package: '$(Pipeline.Workspace)/$(artifactName)/web.zip'
+  - deployment: Deploy_Master
+    displayName: 'Deploy to Azure App Service (master)'
+    environment: 'prod'
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - download: current
+            artifact: '$(artifactName)'
+            displayName: 'Download artifact'
+          - task: AzureWebApp@1
+            displayName: 'Deploy to $(prodWebAppName)'
+            inputs:
+              azureSubscription: '$(serviceConnection)'
+              appName: '$(prodWebAppName)'
               package: '$(Pipeline.Workspace)/$(artifactName)/web.zip'
