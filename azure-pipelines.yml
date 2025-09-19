@@ -18,8 +18,11 @@ variables:
   solution: 'CarSimulatorApp.sln'
   webProject: 'CarSimulator.Server/CarSimulator.Server.csproj'
   artifactName: 'drop'
+  publishDir: '$(Build.ArtifactStagingDirectory)/web'
+  packageZip: '$(Build.ArtifactStagingDirectory)/web.zip'
 
 stages:
+# ===================== BUILD =====================
 - stage: Build
   displayName: 'Build'
   jobs:
@@ -37,20 +40,29 @@ stages:
       displayName: 'Restore'
     - script: dotnet build $(solution) -c $(buildConfiguration)
       displayName: 'Build'
-    - script: dotnet publish $(webProject) -c $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)/web
+    - script: dotnet publish $(webProject) -c $(buildConfiguration) -o $(publishDir)
       displayName: 'Publish web'
+    - task: ArchiveFiles@2
+      displayName: 'Zip published app'
+      inputs:
+        rootFolderOrFile: '$(publishDir)'
+        includeRootFolder: false
+        archiveType: 'zip'
+        archiveFile: '$(packageZip)'
+        replaceExistingArchive: true
     - task: PublishBuildArtifacts@1
       displayName: 'Publish artifact'
       inputs:
         PathtoPublish: '$(Build.ArtifactStagingDirectory)'
         ArtifactName: '$(artifactName)'
 
+# ====================== TEST =====================
 - stage: Test
   displayName: 'Test'
   dependsOn: Build
   jobs:
   - job: Tests
-    displayName: 'Run all tests in solution'
+    displayName: 'Run tests'
     steps:
     - task: UseDotNet@2
       displayName: 'Install .NET SDK 9'
@@ -66,3 +78,27 @@ stages:
         testResultsFiles: '**/*.trx'
         searchFolder: '$(System.DefaultWorkingDirectory)'
         failTaskOnFailedTests: true
+
+# ===================== DEPLOY ====================
+- stage: Deploy
+  displayName: 'Deploy'
+  dependsOn: Test
+  jobs:
+  # --- Deploy till DEV när branchen är 'dev'
+  - deployment: Deploy_Dev
+    displayName: 'Deploy to Azure App Service (dev)'
+    environment: 'dev'
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/dev')
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - download: current
+            artifact: '$(artifactName)'
+            displayName: 'Download artifact'
+          - task: AzureWebApp@1
+            displayName: 'Deploy to carsimdev-tw'
+            inputs:
+              azureSubscription: 'SC-carsimdev-tw'
+              appName: 'carsimdev-tw'
+              package: '$(Pipeline.Workspace)/$(artifactName)/web.zip'
