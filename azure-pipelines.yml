@@ -21,6 +21,9 @@ variables:
   artifactName: 'drop'
   publishDir: '$(Build.ArtifactStagingDirectory)/web'
   packageZip: '$(Build.ArtifactStagingDirectory)/web.zip'
+  serviceConnection: 'SC-carsimdev-tw'
+  devWebAppName: 'carsimdev-tw'
+  prodWebAppName: 'carsimdev-tw'
 
   
   serviceConnection: 'SC-carsimdev-tw'
@@ -102,6 +105,7 @@ stages:
           steps:
           - download: current
             artifact: '$(artifactName)'
+
             displayName: 'Download artifact'
           - task: AzureWebApp@1
             displayName: 'Deploy to $(devWebAppName)'
