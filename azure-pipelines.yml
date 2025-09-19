@@ -84,7 +84,6 @@ stages:
   displayName: 'Deploy'
   dependsOn: Test
   jobs:
-  # --- Deploy till DEV när branchen är 'dev'
   - deployment: Deploy_Dev
     displayName: 'Deploy to Azure App Service (dev)'
     environment: 'dev'
